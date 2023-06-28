@@ -1,0 +1,56 @@
+.pool-info {
+  margin-bottom: 20px;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.pool-info td,
+.pool-info th {
+  padding: 8px;
+  border: 1px solid #ddd;
+}
+
+.pool-info th {
+  font-weight: bold;
+}
+
+.pool-info .table-heading {
+  background-color: #f2f2f2;
+}
+
+/* ping css*/
+
+.ping-success {
+  color: green;
+}
+
+.ping-failure {
+  color: red;
+}
+
+.ping-warning {
+  color: rgb(255, 136, 0);
+}
+
+.packet-loss-success {
+  color: green;
+}
+
+.packet-loss-warning {
+  color: orange;
+}
+
+.packet-loss-failure {
+  color: red;
+}
+
+/* hash css */
+
+.validity-valid {
+  color: green;
+}
+
+.validity-invalid {
+  color: red;
+}
+

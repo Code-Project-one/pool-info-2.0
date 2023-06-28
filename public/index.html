@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Pool List</title>
+  <style>
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .box {
+      width: calc(20% - 20px);
+      width: 180px;
+      height: 150px;
+      padding: 10px;
+      margin: 10px;
+      border: 1px solid black;
+      border-radius: 15px;
+      text-align: center;
+      word-wrap: break-word;
+      cursor: pointer;
+    }
+
+    .ticker {
+      font-size: 24px;
+    }
+  </style>
+</head>
+<body>
+  <input type="text" id="searchInput" placeholder="Search by ticker or pool ID">
+  <div id="poolListContainer" class="container"></div>
+
+  <script>
+    // Fetch the pool data from poollist.json
+    fetch('files/poollist.json')
+      .then(response => response.json())
+      .then(data => {
+        // Shuffle the pool list randomly
+        const shuffledData = shuffle(data);
+
+        // Get the pool list container element
+        const poolListContainer = document.getElementById('poolListContainer');
+
+        // Create an array to store references to all pool boxes
+        const poolBoxes = [];
+
+        // Iterate over each pool in the shuffled data and create the pool boxes
+        shuffledData.forEach(pool => {
+          // Create a pool box element
+          const box = document.createElement('div');
+          box.className = 'box';
+
+          // Create the ticker element and set its text content
+          const ticker = document.createElement('p');
+          ticker.className = 'ticker';
+          ticker.textContent = `${pool.ticker}`;
+
+          // Create the Bach32 ID element and set its text content
+          const bach32Id = document.createElement('p');
+          bach32Id.textContent = `${pool.pool_id_bech32}`;
+
+          // Append the ticker and Bach32 ID elements to the pool box
+          box.appendChild(ticker);
+          box.appendChild(bach32Id);
+
+          // Append the pool box to the pool list container
+          poolListContainer.appendChild(box);
+
+          // Store the pool box reference in the array
+          poolBoxes.push(box);
+        });
+
+        // Get the search input element
+        const searchInput = document.getElementById('searchInput');
+
+        // Add an event listener to the search input for handling input changes
+        searchInput.addEventListener('input', event => {
+          const searchQuery = searchInput.value.toLowerCase().trim(); // Trim whitespace from the search query
+
+          // Check if the search query is empty
+          if (searchQuery === '') {
+            // Show all pool boxes when search query is empty
+            poolBoxes.forEach(box => {
+              box.style.display = 'block';
+            });
+          } else {
+            // Iterate over each pool box and show/hide based on the search query
+            poolBoxes.forEach(box => {
+              const tickerText = box.querySelector('.ticker').textContent.toLowerCase();
+              const bach32IdText = box.querySelector('p:last-child').textContent.toLowerCase();
+
+              if (tickerText.includes(searchQuery) || bach32IdText.includes(searchQuery)) {
+                box.style.display = 'block';
+              } else {
+                box.style.display = 'none';
+              }
+            });
+          }
+        });
+
+        // Add click event listener to each pool box
+        poolBoxes.forEach(box => {
+          box.addEventListener('click', () => {
+            const poolId = box.querySelector('p:last-child').textContent;
+            console.log('Pool ID:', poolId); // Add console log
+            
+
+            // Make a request to the server to update the pool ID
+            fetch('/updatePoolId', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ poolId })
+            })
+              .then(response => {
+                if (response.ok) {
+                  // Redirect to result.html
+                  window.location.href = `result.html`;
+                } else {
+                  console.error('Failed to update the pool ID on the server');
+                }
+              })
+              .catch(error => {
+                console.error('An error occurred while updating the pool ID:', error);
+              });
+          });
+        });
+      })
+      .catch(error => console.error('Error fetching pool list:', error));
+
+    // Function to shuffle an array
+    function shuffle(array) {
+      let currentIndex = array.length;
+      let temporaryValue, randomIndex;
+
+      while (currentIndex !== 0) {
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex--;
+
+        temporaryValue = array[currentIndex];
+        array[currentIndex] = array[randomIndex];
+        array[randomIndex] = temporaryValue;
+      }
+
+      return array;
+    }
+  </script>
+</body>
+</html>
